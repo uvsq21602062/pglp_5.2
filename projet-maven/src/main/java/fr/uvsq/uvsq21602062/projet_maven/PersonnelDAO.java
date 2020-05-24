@@ -27,7 +27,7 @@ public class PersonnelDAO extends DAO<Personnel> {
 		}
 	}
 	/**
-	 * Méthode permettant de trouver tous les elements
+	 * Méthode permettant de trouver tous les elements de la bdd
 	 */
 	public ArrayList<Personnel> toutObtenir() {
 		ArrayList<Personnel> liste = new ArrayList<Personnel>();
@@ -51,7 +51,7 @@ public class PersonnelDAO extends DAO<Personnel> {
 	}
 	
 	/**
-	 * Méthode permettant d'ajouter un element
+	 * Méthode permettant d'ajouter un element dans la bdd
 	 */
 	public void ajouter(Personnel obj) {
 		try {
