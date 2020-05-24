@@ -1,14 +1,10 @@
 package fr.uvsq.uvsq21602062.projet_maven;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.EOFException;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 /**
@@ -16,36 +12,41 @@ import java.util.ArrayList;
  * @author jean
  *
  */
-public class PersonnelDAO implements DAO<Personnel> {
+public class PersonnelDAO extends DAO<Personnel> {
+	/**
+	 * Constructeur de la classe
+	 */
+	public PersonnelDAO() {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			this.conn = DriverManager.getConnection(this.urlConnexion, this.username, this.password);
+			
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
 	/**
 	 * Méthode permettant de trouver tous les elements
 	 */
 	public ArrayList<Personnel> toutObtenir() {
 		ArrayList<Personnel> liste = new ArrayList<Personnel>();
-		
-		try(ObjectInputStream in = new ObjectInputStream(
-				new BufferedInputStream(
-						new FileInputStream("fichier_sauvegarde")))) {
-			try {
-				while(true) {
-					try {
-						liste.add((Personnel) in.readObject());
-					}
-					catch(ClassNotFoundException e) {
-						e.printStackTrace();
-					}
-				}
+		try {
+			PreparedStatement p = this.conn.prepareStatement("select * from Personnel");
+			ResultSet result = p.executeQuery();
+			while(result.next()) {
+				Personnel personnel = new Personnel
+						.Builder(result.getString("nom"), result.getString("prenom"))
+						.dateNaissance(LocalDate.parse(result.getString("dateNaissance")))
+						.fonction(result.getString("fonction"))
+						.numeroTel(result.getString("numeroTel"))
+						.build();
+				liste.add(personnel);
 			}
-			catch(EOFException e) {}
-			
 		}
-		catch (FileNotFoundException e) {
+		catch(SQLException e) {
 			e.printStackTrace();
 		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		
 		return liste;
 	}
 	
@@ -53,16 +54,16 @@ public class PersonnelDAO implements DAO<Personnel> {
 	 * Méthode permettant d'ajouter un element
 	 */
 	public void ajouter(Personnel obj) {
-		try(ObjectOutputStream out = new ObjectOutputStream(
-				new BufferedOutputStream(
-						new FileOutputStream("fichier_sauvegarde")))) {
-			out.writeObject(obj);
-			
+		try {
+			PreparedStatement p = this.conn.prepareStatement("insert into Personnel values(?, ?, ?, ?, ?)");
+			p.setString(1, obj.getNom());
+			p.setString(2, obj.getPrenom());
+			p.setString(3, obj.getDateNaissance().toString());
+			p.setString(4, obj.getFonction());
+			p.setString(5, obj.getNumeroTel());
+			p.executeUpdate();
 		}
-		catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		catch (IOException e) {
+		catch(SQLException e) {
 			e.printStackTrace();
 		}
 	}
