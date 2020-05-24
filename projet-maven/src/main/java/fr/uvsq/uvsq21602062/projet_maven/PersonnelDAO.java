@@ -37,7 +37,7 @@ public class PersonnelDAO extends DAO<Personnel> {
 			while(result.next()) {
 				Personnel personnel = new Personnel
 						.Builder(result.getString("nom"), result.getString("prenom"))
-						.dateNaissance(LocalDate.parse(result.getString("dateNaissance")))
+						.dateNaissance(LocalDate.now())
 						.fonction(result.getString("fonction"))
 						.numeroTel(result.getString("numeroTel"))
 						.build();
